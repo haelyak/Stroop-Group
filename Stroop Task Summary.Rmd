@@ -7,6 +7,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 rm(list = ls(all.names = TRUE))      # remove objects in R
 # set the paths for project, script, and data dirs
@@ -21,12 +22,15 @@ data_dir <- paste(proj_dir, "data", sep = "/")       # data subdir
 #source("https://pastebin.com/raw/8mXH02yg")   # run and comment out after knitting
 source("https://pastebin.com/raw/97NNTTzu")   # run to include in function definitions 
 ```
+
 ```{r}
 library(readr)
 ```
+
 ```{r}
-stroopdat <- read_csv("/Users/janey_matejka/Desktop/GCDS/data/gcds_stroop_project_data.csv")
+stroopdat <- read_csv("gcds_stroop_project_data.csv")
 ```
+
 ```{r}
 stroopdat <- stroopdat %>%
   mutate(., key_color =
@@ -42,13 +46,16 @@ stroopdat <- stroopdat %>%
              font != key_color ~ 'NO'
            ))
 ```
+
 ```{r}
 write_csv(stroopdat, 'gcds_stroop_10_06_accuracy.csv')
 ```
+
 ```{r}
 stroopdat <- stroopdat %>%
   filter(., block == 'stroop')
 ```
+
 ```{r}
 view(stroopdat %>%
   group_by(id, accurate) %>%
