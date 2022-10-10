@@ -29,7 +29,8 @@ library(readr)
 
 ```{r}
 stroopdat <- read_csv("gcds_stroop_project_data.csv")
-print("Kayleah")
+stroopdat <- select(stroopdat, -(wf_kf:domin_sd))
+view(stroopdat)
 ```
 
 ```{r}
