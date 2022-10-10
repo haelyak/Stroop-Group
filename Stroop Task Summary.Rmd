@@ -29,6 +29,7 @@ library(readr)
 
 ```{r}
 stroopdat <- read_csv("gcds_stroop_project_data.csv")
+print("Kayleah")
 ```
 
 ```{r}
