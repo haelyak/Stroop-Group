@@ -63,3 +63,10 @@ view(stroopdat %>%
   summarise(n = n()) %>%
   mutate(AccRat = n/sum(n)))
 ```
+
+```{r}
+StroopDat %>%
+  group_by(id, accurate == "YES") %>%
+  summarize(rtMean = mean(rt))
+```
+
