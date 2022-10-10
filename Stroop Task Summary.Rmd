@@ -1,0 +1,57 @@
+---
+title: "Stroop Task Summary"
+author: "Janey Matejka"
+date: "2022-10-06"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r message=FALSE, warning=FALSE, include=FALSE}
+rm(list = ls(all.names = TRUE))      # remove objects in R
+# set the paths for project, script, and data dirs
+this_rmd_path <- rstudioapi::getActiveDocumentContext()$path
+proj_dir <- gsub("GCDS.*.Rmd", "GCDS", this_rmd_path)
+proj_name = ""
+library(magrittr)
+library(dplyr)
+r_dir    <- paste(proj_dir, "r", sep = "/")          # r subdir
+data_dir <- paste(proj_dir, "data", sep = "/")       # data subdir
+#source("https://pastebin.com/raw/b63hB7Hj")         # get all externals
+#source("https://pastebin.com/raw/8mXH02yg")   # run and comment out after knitting
+source("https://pastebin.com/raw/97NNTTzu")   # run to include in function definitions 
+```
+```{r}
+library(readr)
+```
+```{r}
+stroopdat <- read_csv("/Users/janey_matejka/Desktop/GCDS/data/gcds_stroop_project_data.csv")
+```
+```{r}
+stroopdat <- stroopdat %>%
+  mutate(., key_color =
+           case_when(
+             resp == 'd' ~ 'blue',
+             resp == 'f' ~ 'green', 
+             resp == 'j' ~ 'orange',
+             resp == 'k' ~ 'yellow'
+           )) %>%
+  mutate(., accurate =
+           case_when(
+             font == key_color ~ 'YES', 
+             font != key_color ~ 'NO'
+           ))
+```
+```{r}
+write_csv(stroopdat, 'gcds_stroop_10_06_accuracy.csv')
+```
+```{r}
+stroopdat <- stroopdat %>%
+  filter(., block == 'stroop')
+```
+```{r}
+view(stroopdat %>%
+  group_by(id, accurate) %>%
+  summarise(n = n()) %>%
+  mutate(AccRat = n/sum(n)))
+```
