@@ -65,7 +65,7 @@ view(stroopdat %>%
 ```
 
 ```{r}
-StroopDat %>%
+stroopdat %>%
   group_by(id, accurate == "YES") %>%
   summarize(rtMean = mean(rt))
 ```
