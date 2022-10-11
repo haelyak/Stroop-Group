@@ -1,6 +1,6 @@
 ---
 title: "Stroop Task Summary"
-author: "Janey Matejka, Rebecca Lee"
+author: "Janey Matejka, Rebecca Lee, Kayleah Tsai"
 date: "2022-10-06"
 output: html_document
 ---
