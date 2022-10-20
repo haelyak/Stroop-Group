@@ -25,10 +25,12 @@ source("https://pastebin.com/raw/97NNTTzu")   # run to include in function defin
 
 ```{r}
 library(readr)
+library(dplyr)
 ```
 
 ```{r}
 stroopdat <- read_csv("gcds_stroop_project_data.csv")
+stroopdat <- select(stroopdat, -valence)
 stroopdat <- select(stroopdat, -(wf_kf:domin_sd))
 view(stroopdat)
 ```
@@ -59,15 +61,22 @@ stroopdat <- stroopdat %>%
 ```
 
 ```{r}
-view(stroopdat %>%
+view(stroopdat <- stroopdat %>%
   group_by(id, accurate) %>%
   summarise(n = n()) %>%
   mutate(AccRat = n/sum(n)))
 ```
 
 ```{r}
-stroopdat %>%
+view(stroopdat %>% 
+       group_by(id, accurate) %>%
+       mutate(stroopAcc = AccRat - lag(AccRat)))
+```
+
+```{r}
+view(stroopdat %>%
   group_by(id, accurate == "YES") %>%
-  summarize(rtMean = mean(rt))
+  summarise(., rtMean = mean(rt), rtLatency = rt - rtMean) %>%
+  mutate(rtMean = rtMean, rtLatency = rtLatency))
 ```
 
