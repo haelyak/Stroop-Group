@@ -68,10 +68,17 @@ view(stroopdat <- stroopdat %>%
 ```
 
 ```{r}
-view(stroopdat %>% 
-       group_by(id, accurate) %>%
+view(stroopdat <- stroopdat %>% 
        mutate(stroopAcc = AccRat - lag(AccRat)))
 ```
+
+```{r}
+view(stroopdat <- stroopdat %>%
+       group_by(accurate)%>%
+       mutate(avgAcc = mean(AccRat)))
+
+```
+
 
 ```{r}
 view(stroopdat %>%
