@@ -64,9 +64,6 @@ stroopdat <- stroopdat %>%
 view(stroopdat)
 ```
 
-```{r}
-write_csv(stroopdat, 'gcds_stroop_10_06_accuracy.csv')
-```
 
 ```{r}
 stroopdat <- stroopdat %>%
@@ -125,13 +122,50 @@ view(giantstroop <- left_join(stroopdatWAccRate, stroopdatWRespLat))
 ```{r}
 view(stroopSumSIE <- giantstroop %>%
        group_by(congruency)%>%
-       summarise( meanSIEacc = mean(stroopAcc, na.rm = TRUE), meanSIElat = mean(SIErtLatency, na.rm = TRUE) ))
+       summarise( meanSIEacc = mean(stroopAcc, na.rm = TRUE), 
+                  meanSIElat = mean(SIErtLatency, na.rm = TRUE) ))
 
 ```
 
 ```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(AccRate)) +
+  geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
 
 ```
 
+```{r}
+ggplot(data = giantstroop,
+       mapping = aes(y=AccRate, x=congruency, fill = congruency)) +
+  geom_boxplot()+
+  scale_fill_manual(values = c("#00BFC4", "#F8766D")) + geom_point()
+```
 
+```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(y=AccRate, x=congruency, fill = congruency))+
+  geom_violin(draw_quantiles = .5) + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
+```
+
+
+```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(rtLatency)) +
+  geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
+
+```
+
+```{r}
+ggplot(data = giantstroop,
+       mapping = aes(y=rtLatency, x=congruency, fill = congruency)) +
+  geom_boxplot()+
+  scale_fill_manual(values = c("#00BFC4", "#F8766D")) + geom_point()
+```
+
+```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(y=rtLatency, x=congruency, fill = congruency))+
+  geom_violin(draw_quantiles = .5) + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
+
+```
 
