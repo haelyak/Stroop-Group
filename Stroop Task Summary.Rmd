@@ -32,6 +32,8 @@ library(dplyr)
 stroopdat <- read_csv("gcds_stroop_project_data.csv")
 stroopdat <- select(stroopdat, -valence)
 stroopdat <- select(stroopdat, -(wf_kf:domin_sd))
+stroopdat <- select_if(-(id == 0))
+
 view(stroopdat)
 ```
 
@@ -48,7 +50,13 @@ stroopdat <- stroopdat %>%
            case_when(
              font == key_color ~ 'YES', 
              font != key_color ~ 'NO'
-           ))
+           )) %>%
+  mutate(., congruency = 
+           case_when(
+           font == word ~ 'CONGRUENT', 
+           font != word ~ 'INCONGRUENT'))
+
+view(stroopdat)
 ```
 
 ```{r}
@@ -69,6 +77,7 @@ view(stroopdat <- stroopdat %>%
 
 ```{r}
 view(stroopdat <- stroopdat %>% 
+       group_by(id, congruency)%>%
        mutate(stroopAcc = AccRat - lag(AccRat)))
 ```
 
@@ -81,9 +90,16 @@ view(stroopdat <- stroopdat %>%
 
 
 ```{r}
-view(stroopdat %>%
-  group_by(id, accurate == "YES") %>%
-  summarise(., rtMean = mean(rt), rtLatency = rt - rtMean) %>%
-  mutate(rtMean = rtMean, rtLatency = rtLatency))
+view(stroopdat <- stroopdat %>%
+  group_by(id) %>%
+  mutate(., rtMean = mean(rt), rtLatency = rt - rtMean)%>% 
+  filter(., accurate == "YES")) 
 ```
+
+```{r}
+view(stroopdat <- stroopdat %>% 
+       mutate(stroopAcc = rt - lag(AccRat)))
+
+```
+
 
