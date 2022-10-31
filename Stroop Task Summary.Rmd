@@ -26,13 +26,16 @@ source("https://pastebin.com/raw/97NNTTzu")   # run to include in function defin
 ```{r}
 library(readr)
 library(dplyr)
+library(tidyr)
+library(ggplot2)
 ```
 
 ```{r}
 stroopdat <- read_csv("gcds_stroop_project_data.csv")
 stroopdat <- select(stroopdat, -valence)
 stroopdat <- select(stroopdat, -(wf_kf:domin_sd))
-stroopdat <- select_if(-(id == 0))
+stroopdat <- filter(stroopdat, id != 0)
+cleanStroopDat <- stroopdat
 
 view(stroopdat)
 ```
@@ -46,15 +49,17 @@ stroopdat <- stroopdat %>%
              resp == 'j' ~ 'orange',
              resp == 'k' ~ 'yellow'
            )) %>%
-  mutate(., accurate =
-           case_when(
-             font == key_color ~ 'YES', 
-             font != key_color ~ 'NO'
-           )) %>%
-  mutate(., congruency = 
+   mutate(., congruency = 
            case_when(
            font == word ~ 'CONGRUENT', 
-           font != word ~ 'INCONGRUENT'))
+           font != word ~ 'INCONGRUENT'))%>%
+  
+  mutate(., accurate =
+           case_when(
+             font == key_color ~ 'ACCURATE', 
+             font != key_color ~ 'INACCURATE'
+           ))
+ 
 
 view(stroopdat)
 ```
@@ -69,37 +74,64 @@ stroopdat <- stroopdat %>%
 ```
 
 ```{r}
-view(stroopdat <- stroopdat %>%
-  group_by(id, accurate) %>%
-  summarise(n = n()) %>%
-  mutate(AccRat = n/sum(n)))
+view(stroopdatWAccRate <- stroopdat %>%
+       group_by (id, congruency, accurate) %>%
+       summarise(n = n()) %>%
+       mutate(AccRate = n/sum(n))%>%
+       filter(., accurate == 'ACCURATE')
+     )
 ```
 
 ```{r}
-view(stroopdat <- stroopdat %>% 
-       group_by(id, congruency)%>%
-       mutate(stroopAcc = AccRat - lag(AccRat)))
-```
-
-```{r}
-view(stroopdat <- stroopdat %>%
-       group_by(accurate)%>%
-       mutate(avgAcc = mean(AccRat)))
-
+view(stroopdatWAccRate <- stroopdatWAccRate %>% 
+       group_by(id) %>%
+       mutate(., stroopAcc = AccRate - lag(AccRate)))
 ```
 
 
+
+
 ```{r}
-view(stroopdat <- stroopdat %>%
-  group_by(id) %>%
+view(stroopdatWRespLat <- stroopdat %>%
+  group_by(id, congruency) %>%
   mutate(., rtMean = mean(rt), rtLatency = rt - rtMean)%>% 
-  filter(., accurate == "YES")) 
+  filter(., accurate == "ACCURATE")) 
 ```
 
 ```{r}
-view(stroopdat <- stroopdat %>% 
-       mutate(stroopAcc = rt - lag(AccRat)))
+view(stroopdatWRespLat <- stroopdatWRespLat %>%
+       group_by(id) %>%
+       mutate(., SIErtLatency = rtMean - lag(rtMean)))
+```
+
+
+```{r}
+view(stroopSummAccRate <-
+       stroopdatWAccRate %>%
+       group_by(congruency) %>%
+       summarise(meanAccRate = mean(AccRate)))
+```
+
+```{r}
+view(stroopSummRTLatency <- stroopdatWRespLat %>%
+       group_by(congruency) %>%
+       summarise(meanRT = mean(rtMean)))
+```
+
+```{r}
+view(giantstroop <- left_join(stroopdatWAccRate, stroopdatWRespLat))
+```
+
+```{r}
+view(stroopSumSIE <- giantstroop %>%
+       group_by(congruency)%>%
+       summarise( meanSIEacc = mean(stroopAcc, na.rm = TRUE), meanSIElat = mean(SIErtLatency, na.rm = TRUE) ))
 
 ```
+
+```{r}
+
+```
+
 
 
