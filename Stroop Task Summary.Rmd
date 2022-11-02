@@ -23,6 +23,11 @@ data_dir <- paste(proj_dir, "data", sep = "/")       # data subdir
 source("https://pastebin.com/raw/97NNTTzu")   # run to include in function definitions 
 ```
 
+# **Loading the Libraries**
+
+Here we load the libraries neaded to read in data, clean data, and plot data visualizations.
+
+
 ```{r}
 library(readr)
 library(dplyr)
@@ -30,15 +35,33 @@ library(tidyr)
 library(ggplot2)
 ```
 
+
+# **Data Cleaning**
+
+After we read in the data from the csv file, we need to do some data cleaning. The first thing we need to do is remove unused variables, so that they do not take up space in our dataframes. The unused variables can simply be selected out. We also found someone with an invalid ID of 0, so we removed them from the data. And we did not find a need for the practice trials so we removed them by filtering for only stroop trials.
+
 ```{r}
 stroopdat <- read_csv("gcds_stroop_project_data.csv")
 stroopdat <- select(stroopdat, -valence)
 stroopdat <- select(stroopdat, -(wf_kf:domin_sd))
 stroopdat <- filter(stroopdat, id != 0)
+stroopdat <- stroopdat %>%
+  filter(., block == 'stroop')
+
 cleanStroopDat <- stroopdat
 
 view(stroopdat)
 ```
+
+
+# *Data Cleaning: Variable Creation*
+In order to calculate the measures we want (accuracy rate and response latency), we need to create some new variables. 
+
+- We create a variable called key_color that simply translates the keys pressed to color names based on the mapping of keys to colors that the stroop task gave us.
+
+- We also created a congruency variable that checked if the font was the same color as the word in which case it was a congruent trial.
+We also created an accuracy variable that said whether or not the participant got that trial correct.
+
 
 ```{r}
 stroopdat <- stroopdat %>%
@@ -65,10 +88,9 @@ view(stroopdat)
 ```
 
 
-```{r}
-stroopdat <- stroopdat %>%
-  filter(., block == 'stroop')
-```
+# **Variable Creation**
+
+We wanted to calculate the accuracy rate for each ID, so first we grouped the data by id, congruency, and accuracy. We then counted for each type of trial (congruent and incongruent) how many trials they got right. The accuracy rate was then the number they got right out of the total number of trials. There was an accuracy rate for congruent trials and incongruent trials for each participant.
 
 ```{r}
 view(stroopdatWAccRate <- stroopdat %>%
@@ -78,6 +100,8 @@ view(stroopdatWAccRate <- stroopdat %>%
        filter(., accurate == 'ACCURATE')
      )
 ```
+ 
+We then wanted to measure the SIE effect on accuracy rate. This is simply the difference between the accuracy rate of incongruent trials - accuracy rate of congruent trials. Since our table was set up with the two accuracy rates for each person on consecutive rows, we simply subtracted the two row values with lag.
 
 ```{r}
 view(stroopdatWAccRate <- stroopdatWAccRate %>% 
@@ -85,7 +109,7 @@ view(stroopdatWAccRate <- stroopdatWAccRate %>%
        mutate(., stroopAcc = AccRate - lag(AccRate)))
 ```
 
-
+We also wanted to calculate the response latency for each ID, so we grouped by ID and congruency. We then calculated the mean response time for congruent trials and the mean response time for incongruent trials for each person. Then for each trial a person completed, we calculated the reponse latency as the difference between the response time for a given trial and the mean response time.
 
 
 ```{r}
@@ -95,12 +119,22 @@ view(stroopdatWRespLat <- stroopdat %>%
   filter(., accurate == "ACCURATE")) 
 ```
 
+We then wanted to measure the SIE effect on response latency. This is simply the difference between the response latency of incongruent trials - response latency of congruent trials. Since our table was set up with the two response latencies for each person on consecutive rows, we simply subtracted the two row values with lag.
+```{r}
+view(stroopdatWRespLat <- stroopdatWRespLat %>% group_by(id, congruency) %>%
+       summarise(., rtLatMean = mean(rtLatency)))
+```
+
+
 ```{r}
 view(stroopdatWRespLat <- stroopdatWRespLat %>%
        group_by(id) %>%
-       mutate(., SIErtLatency = rtMean - lag(rtMean)))
+       mutate(., SIErtLatency = rtLatMean - lag(rtLatMean)))
 ```
 
+# **Data Summaries**
+
+To summarise the data, we wanted to look at the overall group outcomes. The overall group accuracy rate would simply be the mean accuracy rate out of all the participants separated by the type of trial. And the difference between the group mean accuracy rates show the overall group SIE effect on accuracy rate. This showed that overall, incongruent trials caused a decrease in accuracy.
 
 ```{r}
 view(stroopSummAccRate <-
@@ -109,12 +143,18 @@ view(stroopSummAccRate <-
        summarise(meanAccRate = mean(AccRate)))
 ```
 
+Similarily, we calculated the group mean response time for the two different trials. This showed that overall, incongruent trials caused a decrease in response time.
+
 ```{r}
 view(stroopSummRTLatency <- stroopdatWRespLat %>%
        group_by(congruency) %>%
-       summarise(meanRT = mean(rtMean)))
+       summarise(meanrtLat = mean(rtLatMean)))
 ```
 
+
+# **Recombination of DataFrames**
+
+In order to do our data wrangling, we separated the dataframes to create one with accuracy rates and one with response latencies, so we used a join to combine them together along with the original data frame to make a giant data frame we would do our data visualization with.
 ```{r}
 view(giantstroop <- left_join(stroopdatWAccRate, stroopdatWRespLat))
 ```
@@ -127,11 +167,14 @@ view(stroopSumSIE <- giantstroop %>%
 
 ```
 
+
+# **Data Visualization**
+
+This plots simply show the entire group's  accuracy rates or the entire group's response times so we can see what the group average for each is and what the distribution between participants is.
 ```{r}
-ggplot(data = giantstroop, 
+ggplot(data = giantstroop,
        mapping = aes(AccRate)) +
-  geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D")) +
-  
+  geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
 
 ```
 
@@ -165,27 +208,27 @@ ggplot(data = giantstroop,
 
 ```{r}
 ggplot(data = giantstroop, 
-       mapping = aes(rtLatency)) +
+       mapping = aes(rtLatMean)) +
   geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
 
 ```
 
 ```{r}
 ggplot(data = giantstroop, 
-       mapping = aes(rtLatency)) +
+       mapping = aes(rtLatMean)) +
   geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D")) + facet_wrap(~id)
 ```
 
 ```{r}
 ggplot(data = giantstroop,
-       mapping = aes(y=rtLatency, x=congruency, fill = congruency)) +
+       mapping = aes(y=rtLatMean, x=congruency, fill = congruency)) +
   geom_boxplot()+
   scale_fill_manual(values = c("#00BFC4", "#F8766D")) + geom_point()
 ```
 
 ```{r}
 ggplot(data = giantstroop, 
-       mapping = aes(y=rtLatency, x=congruency, fill = congruency))+
+       mapping = aes(y=rtLatMean, x=congruency, fill = congruency))+
   geom_violin(draw_quantiles = .5) + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
 
 ```
