@@ -130,8 +130,23 @@ view(stroopSumSIE <- giantstroop %>%
 ```{r}
 ggplot(data = giantstroop, 
        mapping = aes(AccRate)) +
-  geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
+  geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D")) +
+  
 
+```
+
+```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(AccRate)) +
+  geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D")) +
+  facet_wrap(~id)
+```
+
+```{r}
+ggplot(data = giantstroop,
+       mapping = aes(y=AccRate, x=congruency, fill = congruency)) +
+  geom_boxplot()+
+  scale_fill_manual(values = c("#00BFC4", "#F8766D")) + geom_point()
 ```
 
 ```{r}
@@ -144,7 +159,7 @@ ggplot(data = giantstroop,
 ```{r}
 ggplot(data = giantstroop, 
        mapping = aes(y=AccRate, x=congruency, fill = congruency))+
-  geom_violin(draw_quantiles = .5) + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
+  geom_violin(draw_quantiles = .5) + scale_fill_manual(values = c("#00BFC4", "#F8766D")) 
 ```
 
 
@@ -153,6 +168,12 @@ ggplot(data = giantstroop,
        mapping = aes(rtLatency)) +
   geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
 
+```
+
+```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(rtLatency)) +
+  geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D")) + facet_wrap(~id)
 ```
 
 ```{r}
