@@ -115,21 +115,16 @@ We also wanted to calculate the response latency for each ID, so we grouped by I
 ```{r}
 view(stroopdatWRespLat <- stroopdat %>%
   group_by(id, congruency) %>%
-  mutate(., rtMean = mean(rt), rtLatency = rt - rtMean)%>% 
+  mutate(., rtMean = mean(rt))%>% 
   filter(., accurate == "ACCURATE")) 
 ```
 
 We then wanted to measure the SIE effect on response latency. This is simply the difference between the response latency of incongruent trials - response latency of congruent trials. Since our table was set up with the two response latencies for each person on consecutive rows, we simply subtracted the two row values with lag.
-```{r}
-view(stroopdatWRespLat <- stroopdatWRespLat %>% group_by(id, congruency) %>%
-       summarise(., rtLatMean = mean(rtLatency)))
-```
-
 
 ```{r}
 view(stroopdatWRespLat <- stroopdatWRespLat %>%
        group_by(id) %>%
-       mutate(., SIErtLatency = rtLatMean - lag(rtLatMean)))
+       mutate(., SIErtLatency = rtMean - lag(rtMean)))
 ```
 
 # **Data Summaries**
@@ -148,7 +143,7 @@ Similarily, we calculated the group mean response time for the two different tri
 ```{r}
 view(stroopSummRTLatency <- stroopdatWRespLat %>%
        group_by(congruency) %>%
-       summarise(meanrtLat = mean(rtLatMean)))
+       summarise(meanrtLat = mean(rtMean)))
 ```
 
 
@@ -208,27 +203,27 @@ ggplot(data = giantstroop,
 
 ```{r}
 ggplot(data = giantstroop, 
-       mapping = aes(rtLatMean)) +
+       mapping = aes(rtMean)) +
   geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
 
 ```
 
 ```{r}
 ggplot(data = giantstroop, 
-       mapping = aes(rtLatMean)) +
+       mapping = aes(rtMean)) +
   geom_histogram(mapping = aes(fill = as.factor(congruency)), position = "dodge") + scale_fill_manual(values = c("#00BFC4", "#F8766D")) + facet_wrap(~id)
 ```
 
 ```{r}
 ggplot(data = giantstroop,
-       mapping = aes(y=rtLatMean, x=congruency, fill = congruency)) +
+       mapping = aes(y=rtMean, x=congruency, fill = congruency)) +
   geom_boxplot()+
   scale_fill_manual(values = c("#00BFC4", "#F8766D")) + geom_point()
 ```
 
 ```{r}
 ggplot(data = giantstroop, 
-       mapping = aes(y=rtLatMean, x=congruency, fill = congruency))+
+       mapping = aes(y=rtMean, x=congruency, fill = congruency))+
   geom_violin(draw_quantiles = .5) + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
 
 ```
