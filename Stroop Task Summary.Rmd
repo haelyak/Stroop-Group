@@ -135,7 +135,7 @@ To summarise the data, we wanted to look at the overall group outcomes. The over
 view(stroopSummAccRate <-
        stroopdatWAccRate %>%
        group_by(congruency) %>%
-       summarise(meanAccRate = mean(AccRate)))
+       summarise(meanAccRate = mean(AccRate), particpants = n()))
 ```
 
 Similarily, we calculated the group mean response time for the two different trials. This showed that overall, incongruent trials caused a decrease in response time.
@@ -143,7 +143,7 @@ Similarily, we calculated the group mean response time for the two different tri
 ```{r}
 view(stroopSummRTLatency <- stroopdatWRespLat %>%
        group_by(congruency) %>%
-       summarise(meanrtLat = mean(rtMean)))
+       summarise(meanrtLat = mean(rtMean), trials = n()))
 ```
 
 
@@ -158,7 +158,7 @@ view(giantstroop <- left_join(stroopdatWAccRate, stroopdatWRespLat))
 view(stroopSumSIE <- giantstroop %>%
        group_by(congruency)%>%
        summarise( meanSIEacc = mean(stroopAcc, na.rm = TRUE), 
-                  meanSIElat = mean(SIErtLatency, na.rm = TRUE) ))
+                  meanSIElat = mean(SIErtLatency, na.rm = TRUE)))
 
 ```
 
@@ -226,5 +226,92 @@ ggplot(data = giantstroop,
        mapping = aes(y=rtMean, x=congruency, fill = congruency))+
   geom_violin(draw_quantiles = .5) + scale_fill_manual(values = c("#00BFC4", "#F8766D"))
 
+```
+
+
+```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(x = AccRate)) +
+  geom_density(mapping = aes(fill = as.factor(id)),
+               alpha = .5)
+```
+
+Accuracy Rate Mean by Participant
+
+```{r}
+giantstroop %>%
+  ggplot(.) +
+ geom_col(mapping = aes(x = factor(id), y = AccRate),
+           color = "green", alpha = 0.1)
+```
+
+
+Response Time Mean by Participant
+
+```{r}
+giantstroop %>%
+  ggplot(.) +
+ geom_col(mapping = aes(x = factor(id), y = rtMean),
+           color = "green", alpha = 0.1) 
+```
+
+
+Accuracy Rate Across Trials
+
+```{r}
+ggplot(data = giantstroop) +
+  geom_bar(aes(x = trial, y = AccRate), stat = "identity", color = 'darkgreen', alpha = 0.3) 
+```
+
+
+Accuracy Rate Grouped by Team
+
+```{r}
+ggplot(data = giantstroop %>%
+  mutate(., team = case_when(id >= 1001 & id <= 1004 ~ 'Team 1000',
+                             id >= 1101 & id <= 1108 ~ 'Team 1100',
+                            id >= 1301 & id <= 1303 ~ 'Team 1300', 
+                             id >= 1401 & id <= 1405 ~ 'Team 1400', 
+                            id >= 1501 & id <= 1506 ~ 'Team 1500', 
+                            id >= 1701 & id <= 1705 ~ 'Team 1700', 
+                            id >= 1901 & id <= 1903 ~ 'Team 1900'
+  )),  mapping = aes(x = AccRate)) +
+  geom_density(mapping = aes(fill = as.factor(team)),
+               alpha = .5, position = 'stack')
+```
+
+Accuracy Rate Grouped by Congruence
+
+```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(x = AccRate)) +
+  geom_density(mapping = aes(fill = as.factor(congruency)),
+               alpha = .5)
+```
+
+RtMean by Team
+
+```{r}
+ggplot(data = giantstroop %>%
+  mutate(., team = case_when(id >= 1001 & id <= 1004 ~ 'Team 1000',
+                             id >= 1101 & id <= 1108 ~ 'Team 1100',
+                            id >= 1301 & id <= 1303 ~ 'Team 1300', 
+                             id >= 1401 & id <= 1405 ~ 'Team 1400', 
+                            id >= 1501 & id <= 1506 ~ 'Team 1500', 
+                            id >= 1701 & id <= 1705 ~ 'Team 1700', 
+                            id >= 1901 & id <= 1903 ~ 'Team 1900'
+  )),  mapping = aes(x = rtMean)) +
+  geom_density(mapping = aes(fill = as.factor(team)),
+               alpha = .5, position = 'stack')
+```
+
+
+Accuracy Rate by Font Color
+
+```{r}
+ggplot(data = giantstroop, 
+       mapping = aes(x = AccRate)) +
+  geom_density(mapping = aes(fill = as.factor(font)),
+               alpha = .5)
 ```
 
